@@ -97,3 +97,27 @@
 
 ## node.js安装
 
+node.js下载地址：[https://nodejs.org](https://nodejs.org)
+
+可运行平台：Mac OS X, Windows, Linux
+
+当前版本：v8.9.3
+
+### 安装步骤
+
+1. 双击安装，默认安装位置：C:\Program Files\nodejs\
+
+2. 进入安装目录运行npm命令，安装redis库（或称redis模块）
+
+   C:\Program Files\nodejs>npm install redis
+
+3. 安装完成后在nodejs\node_modules下会产生redis的相关文件夹，这里就是redis的客户端安装位置
+
+   ​
+
+   ​
+
+   ​
+
+   ​
+
