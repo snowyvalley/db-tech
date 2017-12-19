@@ -107,17 +107,55 @@ node.js下载地址：[https://nodejs.org](https://nodejs.org)
 
 1. 双击安装，默认安装位置：C:\Program Files\nodejs\
 
-2. 进入安装目录运行npm命令，安装redis库（或称redis模块）
+2. 建立项目开发文件夹: D:\redisdemo\ch01
 
-   C:\Program Files\nodejs>npm install redis
+3. 进入项目开发文件夹运行npm命令，安装redis库（或称redis模块）
 
-3. 安装完成后在nodejs\node_modules下会产生redis的相关文件夹，这里就是redis的客户端安装位置
+   D:\redisdemo\ch01>npm install redis
 
-   ​
+4. 安装完成后在ch01\node_modules下会产生redis的相关文件夹，这里就是redis的客户端安装位置
 
-   ​
-
-   ​
+   **注意：不要在nodejs安装文件夹下运行npm install redis，这样会删除npm包，可以运行npm install redis -g 安装为全局方式。**
 
    ​
+
+
+## 使用node.js操作redis
+
+### 编写代码
+
+在nodejs安装目录下建立hello.js并输入如下代码：
+
+var redis = require("redis"); // 1
+var client = redis.createClient(); // 2
+client.set("my_key", "Hello World using Node.js and Redis"); // 3
+client.get("my_key", redis.print); // 4
+client.quit(); // 5
+
+代码说明：
+
+line1：表示node.js需要redis库
+
+line2：建立redis客户端对象
+
+line3：执行redis的set命令将一个字符串存储在my_key中
+
+line4：执行redis的get命令取出my_key中的值并打印
+
+line5：关闭到redis的服务端连接
+
+### 运行代码：
+
+在项目文件夹下运行命令行：
+
+D:\redisdemo\ch01\>node hello.js
+Reply: Hello World using Node.js and Redis
+
+***
+
+## 使用webstorm开发node.js
+
+参考内容：[ch01-ref-使用webstorm编写node.js操作redis.md](ch01-ref-使用webstorm编写node.js操作redis.md)
+
+## redis 数据类型
 
