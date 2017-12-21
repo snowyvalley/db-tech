@@ -159,3 +159,72 @@ Reply: Hello World using Node.js and Redis
 
 ## redis 数据类型
 
+### String
+
+可以用于存储任何类型的数据：
+
+- 文本（xml，json，html，或者原始文本）
+- 整数
+- 浮点数
+- 二进制数（视频，图片，音频）
+
+**注意：String类型的数据不能超过512M**
+
+String类型可以用于以下场合：
+
+- 缓存机制：将文本或者二进制数据缓冲到redis中。这些数据来自html页面上的任何内容以及通过接口调用得到的图片，视频等。
+
+- 缓存自动过期：对于操作数据库时，查询时间较长，或者频繁的查询，为了提高性能将使用缓存机制，当长时间不再访问这些数据时，又需要这些缓存自动过期。
+
+### 通过redis-cli使用String的例子
+
+  相关命令：
+
+  **MSET**：
+
+  一次设置多个key和值，key-value对用空格隔开
+
+  **MGET**：
+
+  一次返回多个key名对应的值，key名用空格隔开
+
+  *代码示例*
+
+  C:\develop_tools\redis>redis-cli
+  127.0.0.1:6379> mset student1 "jerry" student2 "petter"
+  OK
+  127.0.0.1:6379> mget student1 student2
+  1) "jerry"
+  2) "petter"
+  127.0.0.1:6379>
+
+**EXPIRE**
+
+为给定的key添加一个过期时间（单位为秒），过期后自动删除给key，返回1表示设置成功，返回0表示该key不存在或者无法设置
+
+**TTL**(time to live)
+
+- 返回正数，表示给定key存活了多少秒
+- -2 该key已经过期或者不存在
+- -1 该key存在，但没有设置过期时间
+
+*代码示例*
+
+127.0.0.1:6379> set course "Redis Basic"
+OK
+127.0.0.1:6379> expire course 10
+(integer) 1
+127.0.0.1:6379> get course
+"Redis Basic"
+127.0.0.1:6379> ttl course
+(integer) -2
+127.0.0.1:6379> get course
+(nil)
+127.0.0.1:6379>
+
+**INCR**
+
+
+
+
+
