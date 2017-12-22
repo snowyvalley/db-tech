@@ -325,7 +325,22 @@ function showResults(id) {
 }
 ```
 
-*step5:投票测试代码*
+【代码说明】
+
+1. 为MGET命令传递一个key数组和一个回调函数。如果key不存在或者没有值将返回null
+
+2. 在匿名函数中，参数replies是数组，索引0处放的是articleKey的值即文章标题，而索引1处放的是voteKey的值即票数
+
+3. console.log的用法：
+
+   console.log(object[, object, ...])
+   使用频率最高的一条语句：向控制台输出一条消息。
+   支持 C 语言 printf 式的格式化输出。当然，也可以不使用格式化输出来达到同样的目的：
+   var animal='frog', count=10;
+   console.log("The %s jumped over %d tall buildings", animal, count);
+   console.log("The", animal, "jumped over", count, "tall buildings");
+
+*step5:投票测试代码* 
 
 ```
 upVote(1001);
@@ -346,4 +361,104 @@ client.quit();
 The article[ what is JVM] has 2 votes
 The article[ Java basic for beginer] has 1 votes
 The article[ about the Runtime exception] has 2 votes
+
+***
+
+### List
+
+- List类型在Redis中非常灵活，可以扮演简单集合，栈或者队列。
+- List命令是原子性的。
+- 操作list的命令是阻塞式的，当一个客户端建立了一个空列表，其他客户端需要等待该客户端向其中添加一个新项目。
+- Redis中的list是Linked List
+
+**List应用场合**
+
+- 事件队列
+- 存储用户最新帖子：比如Twitter
+
+#### List示例
+
+*LPUSH*
+
+向List的开头插入数据（left push）
+
+*RPUSH*
+
+向List结尾插入数据（right push)
+
+*LLEN*
+
+List长度（List length）
+
+*LINDEX*
+
+返回指定list在给定索引处的值，左侧（开头）第一个元素为索引为0，负值表示从右侧（末尾）访问，-1表示右侧第一个元素，-2右侧第二个元素
+
+redis-cli练习：
+
+C:\develop_tools\redis>redis-cli
+127.0.0.1:6379> lpush books "01:Java Basic"
+(integer) 1
+127.0.0.1:6379> lpush books "02:Oracle advice"
+(integer) 2
+127.0.0.1:6379> rpush books "03:redis basic"
+(integer) 3
+127.0.0.1:6379> llen books
+(integer) 3
+127.0.0.1:6379> lindex books 1
+"01:Java Basic"
+127.0.0.1:6379> lindex books 0
+"02:Oracle advice"
+
+*LRANGE*
+
+返回给定索引范围内的元素构成的数组，索引值可正可负
+
+redis-cli练习：
+
+127.0.0.1:6379> lrange books 0 1
+1) "02:Oracle advice"
+2) "01:Java Basic"
+127.0.0.1:6379> lrange books 0 -1
+1) "02:Oracle advice"
+2) "01:Java Basic"
+3) "03:redis basic"
+
+*LPOP*
+
+移除并返回list第一个元素
+
+*RPOP*
+
+移除并返回list最后一个元素
+
+**注意：Redis的list的不能从中间插入和删除数据**
+
+redis-cli练习：
+
+127.0.0.1:6379> lpop books
+"02:Oracle advice"
+127.0.0.1:6379> lrange books 0 -1
+1) "01:Java Basic"
+2) "03:redis basic"
+127.0.0.1:6379> rpop books
+"03:redis basic"
+127.0.0.1:6379> lrange books 0 -1
+1) "01:Java Basic"
+127.0.0.1:6379>
+
+#### 实现一个通用队列系统
+
+*step1：编写queue函数*
+
+建立queue.js，编写如下代码：
+
+```
+function Queue(queueName,redisClient) {//接收队列名和redis客户端对象作为参数
+    this.queueName = queueName;//将对列名保存到属性中
+    this.redisClient = redisClient;//保存redis客户端对象到属性中
+    this.queueKey = 'queues:'+queueName;//设置Redis key名
+    this.timeout = 0;//设置timeout属性为0，表示list命令执行后也不超时
+}
+```
 
