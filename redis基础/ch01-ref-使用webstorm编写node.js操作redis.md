@@ -10,7 +10,20 @@
 
    【注意：AppData文件夹是隐藏的】
 
-2. 安装redis模块（全局安装）
+2. 安装 express
+
+   npm install express-generator -g
+
+3. 安装express-generator
+
+   C:\>npm install express-generator -g
+   C:\Users\jerry\AppData\Roaming\npm\express -> C:\Users\jerry\AppData\Roaming\npm
+   \node_modules\express-generator\bin\express-cli.js
+
+   express-generator@4.15.5
+   added 6 packages in 2.631s
+
+4. 安装redis模块（全局安装）
 
    在任何目录下运行命令行：
 
@@ -22,19 +35,19 @@
 
    查看当前全局安装位置：npm root -g
 
-3. 也可以安装到当前项目中，也可以在当前项目中安装redis模块，这时只需要进入到项目当前文件夹中运行命令行：npm install redis
+5. 也可以安装到当前项目中，也可以在当前项目中安装redis模块，这时只需要进入到项目当前文件夹中运行命令行：npm install redis
 
-4. 在webstorm中设置redis环境
+6. 在webstorm中设置redis环境
 
    File>Setting>Languages&Frameworks>Node.js and NPM
 
    设置Node interpreter：选择node安装位置
 
-5. 建立nodejs项目
+7. 建立nodejs项目
 
    file>new>project>Node.js Express App 输入项目位置，会自动选择node.js环境
 
-6. 为该项目添加redis模块
+8. 为该项目添加redis模块
 
    在webstorm中运行终端窗口，或者进入到项目文件夹，自己运行dos命令。
 
@@ -46,7 +59,7 @@
 
    【注意：这种方式解决在即使全局安装redis仍旧无法加载redis模块问题。】
 
-7. 编写js源码，并测试运行
+9. 编写js源码，并测试运行
 
    建立hello.js
 
@@ -58,7 +71,7 @@
 
    右键点击源码文件hello.js选择运行“hello.js”
 
-8. 输出结果
+10. 输出结果
 
    Reply: Hello World using Node.js and Redis
 

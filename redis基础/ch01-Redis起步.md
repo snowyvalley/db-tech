@@ -224,7 +224,126 @@ OK
 
 **INCR**
 
+将指定key的值加1后，返回该值
 
+**INCRBY**
 
+将指定key加上给定整数后，并返回该值
 
+**DECR、DECRBY**
+
+和INCR,INCRBY刚好相反，只是减小值
+
+**INCRBYFLOAT**
+
+加上一个浮点数并返回
+
+**注意：INCRBY,DECRBY,INCRBYFLOAT均可接收正数和负数**
+
+*代码示例*
+
+C:\develop_tools\redis>redis-cli
+127.0.0.1:6379> set counter 100
+OK
+127.0.0.1:6379> incr counter
+(integer) 101
+127.0.0.1:6379> incrby counter 5
+(integer) 106
+127.0.0.1:6379> decr counter
+(integer) 105
+127.0.0.1:6379> decrby counter 50
+(integer) 55
+127.0.0.1:6379> incrbyfloat counter 5.5
+"60.5"
+127.0.0.1:6379> get counter
+"60.5"
+127.0.0.1:6379>
+
+**注意：**
+
+*Redis是单线程的，这就意味着每一时刻只会有一个客户端执行命令，不会存在多个客户端同时访问相同key的问题。*
+
+### 使用Node.js建立投票系统
+
+**需求**
+
+1. 建立一个文章列表
+2. 使用node.js为列表中的文章进行投票，票数加1
+3. 减小一个文章的票数，票数减1
+4. 显示文章及票数
+
+**实现思路**
+
+- 将文章列表存储到redis中
+- 编写3个函数，upVote,downVote,showResults均将文章ID作为参数
+- 文章key的命名规则    article:<id>:java
+- 投票key的命名规则    article:<id>:votes
+
+**实现步骤**
+
+*step1：建立文章列表（假设有三篇文章）*
+
+127.0.0.1:6379> set article:1001:java "what is JVM"
+OK
+127.0.0.1:6379> set article:1002:java "Java basic for beginer"
+OK
+127.0.0.1:6379> set article:1003:java "about the Runtime exception"
+OK
+127.0.0.1:6379>
+
+*step2：编写投票的代码*
+
+文件名：aritcles-popularity.js
+
+```
+var redis = require("redis");
+var client = redis.createClient();
+function upVote(id) {
+    var key = "article:"+id+":votes";
+    client.incr(key);
+}
+```
+
+*step3：编写减小投票数的代码*
+
+```
+function downVote(id) {
+    var key = "article:"+id+":votes";
+    client.decr(key);
+}
+```
+
+*step4：编写显示文章和投票数的代码*
+
+```
+function showResults(id) {
+    var articleKey = "article:"+id+":java";
+    var voteKey = "article:"+id+":votes";
+    client.mget([articleKey,voteKey],function (err,replies) {
+        console.log('The article- '+replies[0]+'] has',replies[1],'votes');
+    });
+}
+```
+
+*step5:投票测试代码*
+
+```
+upVote(1001);
+upVote(1002);
+upVote(1003);
+upVote(1001);
+upVote(1001);
+upVote(1003);
+downVote(1001);
+showResults(1001);
+showResults(1002);
+showResults(1003);
+client.quit();
+```
+
+*step6:运行结果*
+
+The article[ what is JVM] has 2 votes
+The article[ Java basic for beginer] has 1 votes
+The article[ about the Runtime exception] has 2 votes
 
