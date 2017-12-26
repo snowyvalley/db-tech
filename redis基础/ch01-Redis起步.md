@@ -462,3 +462,94 @@ function Queue(queueName,redisClient) {//接收队列名和redis客户端对象�
 }
 ```
 
+*step2:我们需要为队列建立三个方法：size，push，pop*
+
+实现size方法
+
+```
+Queue.prototype.size = function (callback) {//prototype返回Queue的原型引用，和其他编程语言
+// 中类的解决方案类似，为Queue建立一个size方法，该方法接收callback作为参数
+    this.redisClient.llen(this.queueKey,callback);//由于Redis客户端是异步的，需要传递为llen函数callback作为参数
+
+}
+```
+
+实现push方法
+
+```
+Queue.prototype.push = function (data) {//接收任何字符串
+    this.redisClient.lpush(this.queueKey,data);//加入到list的头部
+};
+```
+
+【注意】
+
+我们要实现的是队列，队列是先进先出FIFO（First In，First Out），因此我们需要在队列的前面插入数据，而从队列的尾部移除数据
+
+实现pop方法
+
+```
+Queue.prototype.pop = function (callback) {//
+    this.redisClient.brpop(this.queueKey,this.timeout,callback);//从尾部移除数据
+};
+exports.Queue = Queue;//将queue.js开放给其他模块调用，其他模块可以使用require引入它。
+```
+
+*说明*
+
+- 这里是从尾部移除数据，如果前面push用的是rpush，那么这里就要使用blpop，队列是从一端加数据，从另一端移除数据
+- brpop是移除list中最后一个元素
+- brpop是rpop的阻塞式版本，如果list为空，会等到一个新元素加入 列表时，或者用户定义的等待时间到时，才返回，如果没有移除到元素返回null，如果超时时间为0表示永远等待，等待时间为秒。
+
+*step3：向队列中添加数据*
+
+新建文件：producer-worker.js
+
+```
+/**
+ * Created by jerry on 2017/12/25.
+ */
+var redis = require("redis");
+var client = redis.createClient();
+var queue = require("./queue");//引入 queue.js
+var logsQueue = new queue.Queue("logs",client);
+var MAX = 5;
+for (var i = 0;i<MAX;i++){
+    logsQueue.push("Hello world #" +i);
+}
+console.log("Created "+MAX + " logs");//
+client.quit();
+```
+
+运行后输出结果（直接在webstorm中右键运行或者在命令行输入node producer-worker）：
+
+Created 5 logs
+
+*step4：从队列中提取内容*
+
+建立consumer-worker.js
+
+```
+var redis = require("redis");
+var client = redis.createClient();
+var queue =require("./queue");
+var logsQueue = new queue.Queue("logs",client);
+function logMessages() {
+    logsQueue.pop(function (err,replies) {
+        var queueName = replies[0];
+        var message = replies[1];
+        console.log("[got message]:"+message);
+        logsQueue.size(function (err,size) {
+            console.log(size +" logs left");
+
+        });
+        logMessages();
+    });
+}
+logMessages();
+```
+
+*说明：程序采用递归调用，并一直等待，一点有内容加入队列就会取出来*
+
+
+
