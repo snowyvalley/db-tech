@@ -551,5 +551,157 @@ logMessages();
 
 *说明：程序采用递归调用，并一直等待，一点有内容加入队列就会取出来*
 
+### Hash类型
 
+####hash概述
+
+- 在redis中，hash是String到String的映射。
+- 在redis内部hash被处理成ziplist和hashtable
+- ziplist是经过内存优化的双向链表
+
+#### 在redis-cli中使用hash
+
+**HSET**
+
+将某个域和值设置到指定key下
+
+语法：HSET 	 【key】		【field】	【value】
+
+**HMSET**
+
+为key设置多个域值，用空格隔开
+
+**HINCRBY**
+
+将一个域的值加上一个整数
+
+**HINCRBYFLOAT**
+
+和hincrby类似，只是换成浮点数
+
+*示例*
+
+127.0.0.1:6379> hset movie "title" "the Greate Wall"
+(integer) 1
+127.0.0.1:6379> hmset movie "year" 2014 "rating" 8.5 "watchers" 10000
+OK
+127.0.0.1:6379> hincrby movie "watchers" 3
+(integer) 10003
+127.0.0.1:6379>
+
+**HGET/HMGET**
+
+从hash中返回一个/多个域
+
+**HDEL**
+
+从hash中删除一个域
+
+**HGETALL**
+
+返回一个数组，包含hash中所有域/值对
+
+**HKEYS/HVALS**
+
+从hash中分别返回域名列表和值列表
+
+*示例*
+
+127.0.0.1:6379> hget movie "title"
+"the Greate Wall"
+127.0.0.1:6379> hmget movie "title" "watchers"
+1) "the Greate Wall"
+2) "10003"
+127.0.0.1:6379> hdel movie "watchers"
+(integer) 1
+127.0.0.1:6379> hgetall movie
+1) "title"
+2) "the Greate Wall"
+3) "year"
+4) "2014"
+5) "rating"
+6) "8.5"
+127.0.0.1:6379> hkeys movie
+1) "title"
+2) "year"
+3) "rating"
+127.0.0.1:6379> hvals movie
+1) "the Greate Wall"
+2) "2014"
+3) "8.5"
+127.0.0.1:6379>
+
+#### 使用hash的投票系统
+
+**需求**
+
+模拟对一篇帖子或文章投票，该帖子表现为一个连接，包含连接id，作者，标题，连接，分数（投票分）
+
+*step1 保存连接信息*
+
+新建文件hash-voting-system.js
+
+```
+function saveLink(id,author,title,link) {
+    //使用hmset建立一个保存多个域的hash
+    client.hmset("link:"+id,"author",author,"title",title,"link",link,"score",0);
+}
+```
+
+*step2：编写upVote和downVote函数*
+
+```
+function upVote(id) {
+    client.hincrby("link:"+id,"score",1);//将票数加1
+}
+
+function downVote(id) {
+    client.hincrby("link:"+id,"score",-1);//将票数减1，在hash中没有hdecryb方法，可以通过传递负值的方式实现该功能
+    
+}
+```
+
+*step3 显示投票信息*
+
+```
+function showDetails(id) {
+    client.hgetall("link:"+id,function (err,replies) {
+        console.log("Title:"+replies['title']);
+        console.log("Author:"+replies['author']);
+        console.log("Link:"+replies['link']);
+        console.log("Score:"+replies['score']);
+        console.log("---------------------------------------")
+    });
+}
+```
+
+*step4 测试代码*
+
+~~~
+saveLink(111,"jerry","jerry test link abc","http://www.abc.cn/jerry");
+upVote(111);
+upVote(111);
+saveLink(112,"petter","How to driver a car","http://www.abc.cn/driver");
+upVote(112);
+upVote(112);
+downVote(112);
+showDetails(111);
+showDetails(112);
+client.quit();
+~~~
+
+*step5 运行结果*
+
+```
+Title:jerry test link abc
+Author:jerry
+Link:http://www.abc.cn/jerry
+Score:2
+---------------------------------------
+Title:How to driver a car
+Author:petter
+Link:http://www.abc.cn/driver
+Score:1
+---------------------------------------
+```
 
